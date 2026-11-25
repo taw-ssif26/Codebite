@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="Codezy">
+  <rect x="2" y="6" width="36" height="36" rx="10" fill="#ff8903"/>
+  <path d="M17 18l-7 6 7 6M27 18l7 6-7 6" fill="none" stroke="#070B10" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="50" y="33" font-family="Syne, Arial, sans-serif" font-size="26" font-weight="800" fill="#F4F7FA" letter-spacing="-1">codezy</text>
+  <circle cx="204" cy="30" r="4" fill="#349133"/>
+</svg>

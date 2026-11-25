@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Defaults mirror the -8°C start state; overwritten live by ThermalProvider. */
+  --frost: 0.9; --fog: 0.8; --sun: 0; --warmth: 0;
+  --bg-primary: 7 11 16; --bg-secondary: 13 19 28; --text-primary: 244 247 250; --text-muted: 142 155 174;
+  --accent-cyan: 110 231 245; --accent-amber: 251 191 36; --accent-brand-1: 255 137 3; --accent-brand-2: 52 145 51;
+}
+
+html { background: rgb(var(--bg-primary)); color-scheme: dark; scroll-behavior: smooth; }
+body {
+  background: transparent; color: rgb(var(--text-primary));
+  font-family: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; min-height: 100vh;
+}
+::selection { background: rgb(var(--accent-cyan) / .35); }
+:focus-visible { outline: 2px solid rgb(var(--accent-cyan)); outline-offset: 3px; }
+
+@layer components {
+  .micro { font-family: 'JetBrains Mono Variable', monospace; font-size: .68rem; letter-spacing: .15em; text-transform: uppercase; color: rgb(var(--text-muted)); }
+  .tnum { font-family: 'JetBrains Mono Variable', monospace; font-variant-numeric: tabular-nums; }
+  .display { font-family: 'Syne Variable', system-ui, sans-serif; letter-spacing: -.03em; line-height: .95; }
+  .btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: 999px;
+    background: rgb(var(--accent-brand-1)); color: rgb(var(--bg-primary)); font-weight: 700;
+    padding: .8rem 1.5rem; transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 0 0 1px rgb(var(--accent-brand-1) / .4), 0 10px 30px -10px rgb(var(--accent-brand-1) / .6);
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-ghost {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.14); padding: .75rem 1.25rem; color: rgb(var(--text-primary));
+    transition: background .2s, border-color .2s;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.25); }
+  .input {
+    width: 100%; border-radius: .75rem; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+    padding: .75rem 1rem; color: rgb(var(--text-primary)); transition: border-color .2s, background .2s;
+  }
+  .input:focus { outline: none; border-color: rgb(var(--accent-cyan) / .7); background: rgba(255,255,255,.07); }
+  .input::placeholder { color: rgb(var(--text-muted) / .6); }
+  select.input option { background: #0D131C; color: #F4F7FA; }
+
+  /* Frosted quartz surface. Ice crystals creep into the corners as --frost rises and melt as it falls. */
+  .glass {
+    position: relative; background: rgba(255,255,255,.04);
+    -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.08); border-radius: 1.25rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+  }
+  .glass::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background:
+      radial-gradient(130px 90px at 0 0, rgba(225,246,255,.5), transparent 70%),
+      radial-gradient(150px 100px at 100% 100%, rgba(225,246,255,.38), transparent 70%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 1px, transparent 1px 7px);
+    opacity: calc(var(--frost) * .5); mix-blend-mode: screen;
+  }
+  .tag-urgent { border-color: rgb(var(--accent-amber) / .6); color: rgb(var(--accent-amber)); }
+  .tag-schedule { border-color: rgb(var(--accent-cyan) / .6); color: rgb(var(--accent-cyan)); }
+  .tag-general { border-color: rgba(255,255,255,.2); color: rgb(var(--text-muted)); }
+}
+
+/* ---------- Atmosphere layers (opacity bound to thermal vars) ---------- */
+.atm-base { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(var(--bg-secondary)) 0%, rgb(var(--bg-primary)) 70%); }
+.atm-cold { position: absolute; inset: 0; opacity: var(--frost);
+  background: radial-gradient(ellipse 80% 60% at 20% 0%, rgb(var(--accent-cyan) / .12), transparent 70%); }
+.atm-warm { position: absolute; inset: 0; opacity: var(--warmth);
+  background: linear-gradient(180deg, rgb(var(--accent-amber) / .16), rgb(var(--accent-amber) / .03) 55%, transparent); }
+.atm-fog { position: absolute; left: -50%; width: 200%; bottom: 0; height: 45%; opacity: calc(var(--fog) * .9);
+  background: radial-gradient(ellipse 30% 60% at 20% 80%, rgba(190,220,240,.12), transparent 70%),
+              radial-gradient(ellipse 35% 70% at 55% 90%, rgba(190,220,240,.1), transparent 70%),
+              radial-gradient(ellipse 30% 55% at 85% 85%, rgba(190,220,240,.12), transparent 70%); }
+.atm-fog-a { animation: drift 70s linear infinite; }
+.atm-fog-b { height: 32%; opacity: calc(var(--fog) * .6); animation: drift 110s linear infinite reverse; }
+.atm-sun-glow { position: absolute; inset: 0; opacity: var(--sun);
+  background: radial-gradient(circle at 82% -8%, rgba(255,220,140,.6), rgba(255,190,80,.18) 30%, transparent 55%); }
+.atm-sun-beams { position: absolute; inset: 0; opacity: calc(var(--sun) * .85); mix-blend-mode: screen;
+  background: repeating-conic-gradient(from 195deg at 82% -8%, rgba(255,214,120,.2) 0deg 2.5deg, transparent 2.5deg 8deg);
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 82% 0%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse 90% 90% at 82% 0%, #000 0%, transparent 75%); }
+.atm-flare { position: absolute; border-radius: 50%; opacity: calc(var(--sun) * .5);
+  background: radial-gradient(circle, rgba(255,230,170,.55), transparent 70%); mix-blend-mode: screen; }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-25%); } }
+
+/* ---------- Thermometer slider ---------- */
+.thermo { -webkit-appearance: none; appearance: none; background: transparent; writing-mode: vertical-lr; direction: rtl; width: 22px; height: 100%; cursor: pointer; }
+.thermo::-webkit-slider-runnable-track { width: 4px; border-radius: 4px; background: linear-gradient(to top, rgb(var(--accent-cyan)), #cfe9f5 60%, rgb(var(--accent-amber))); }
+.thermo::-moz-range-track { width: 4px; border-radius: 4px; background: linear-gradient(to top, rgb(var(--accent-cyan)), #cfe9f5 60%, rgb(var(--accent-amber))); }
+.thermo::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: rgb(var(--bg-primary)); border: 2px solid rgb(var(--accent-brand-1)); margin-left: -7px; box-shadow: 0 0 12px rgb(var(--accent-brand-1) / .5); }
+.thermo::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: rgb(var(--bg-primary)); border: 2px solid rgb(var(--accent-brand-1)); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
