@@ -141,3 +141,13 @@ body {
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .16), transparent); transform: skewX(-18deg);
   animation: badge-sheen 7s ease-in-out infinite; }
 @keyframes badge-sheen { 0%, 62% { left: -60%; } 100% { left: 140%; } }
+
+/* ---------- Technology gears (always visible: they do not melt with the temperature) ---------- */
+.gear-layer { position: absolute; inset: 0;
+  transform: translate3d(calc(var(--px, 0) * var(--par) * 1px), calc(var(--py, 0) * var(--par) * 1px), 0);
+  transition: transform .9s cubic-bezier(.2,.7,.2,1); will-change: transform; }
+.gear-pair { position: absolute; color: rgb(var(--accent-cyan)); --sc: 1;
+  transform-origin: 0 0; transform: rotate(var(--r, 0deg)) scale(var(--sc)); }
+.gear-pair > span { position: absolute; display: block; }
+.gear-svg { display: block; overflow: visible; width: auto; height: auto; }
+@media (max-width: 640px) { .gear-pair { --sc: .62; } }

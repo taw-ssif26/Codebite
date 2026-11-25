@@ -138,6 +138,75 @@ function Crystals() {
   );
 }
 
+
+// ---------- Technology gears: meshing pairs that turn in opposite directions ----------
+// Line-art gears sit beside the crystals. Each pair shares one tooth size, and the speed ratio follows
+// the tooth counts (small gear turns faster), so the teeth really do interlock while rotating.
+const pt = (r: number, deg: number) => {
+  const a = (deg * Math.PI) / 180;
+  return `${(r * Math.sin(a)).toFixed(2)} ${(-r * Math.cos(a)).toFixed(2)}`;
+};
+function gearPath(n: number, rp: number, m: number) {
+  const ro = rp + m, rr = rp - 1.25 * m, p = 360 / n;
+  let d = '';
+  for (let k = 0; k < n; k++) {
+    const t = k * p;
+    d += `${k === 0 ? 'M' : 'L'}${pt(rr, t - 0.5 * p)} L${pt(rr, t - 0.27 * p)} L${pt(ro, t - 0.15 * p)} L${pt(ro, t + 0.15 * p)} L${pt(rr, t + 0.27 * p)} `;
+  }
+  return `${d}Z`;
+}
+
+function Gear({ n, rp, m, spin, reverse, offset, sw }: { n: number; rp: number; m: number; spin: number; reverse: boolean; offset: number; sw: number }) {
+  const ro = rp + m, rr = rp - 1.25 * m;
+  const spokes = Array.from({ length: 6 }, (_, i) => i * 60);
+  return (
+    <svg className="crystal-spin gear-svg" width={ro * 2} height={ro * 2} viewBox={`${-ro} ${-ro} ${ro * 2} ${ro * 2}`}
+      style={{ animationDuration: `${spin}s`, animationDirection: reverse ? 'reverse' : 'normal' }}>
+      <g fill="none" stroke="currentColor" strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" transform={`rotate(${offset})`}>
+        <path d={gearPath(n, rp, m)} />
+        <circle r={rr * 0.72} />
+        <circle r={rr * 0.5} strokeDasharray={`${sw * 1.5} ${sw * 5}`} />
+        <circle r={rr * 0.16} />
+        {spokes.map((a) => <path key={a} d={`M${pt(rr * 0.16, a)} L${pt(rr * 0.72, a)}`} />)}
+      </g>
+    </svg>
+  );
+}
+
+// nA must be a multiple of 4 so the left gear has a tooth pointing straight at its partner.
+const GEAR_PAIRS = [
+  { x: 1, y: 63, rot: -14, nA: 12, nB: 8, P: 64, spin: 46, dir: 1, o: 0.34, blur: 0 },
+  { x: 77, y: 20, rot: 26, nA: 16, nB: 10, P: 48, spin: 52, dir: -1, o: 0.32, blur: 0 },
+  { x: 40, y: 1, rot: 4, nA: 12, nB: 12, P: 30, spin: 34, dir: 1, o: 0.28, blur: 0 },
+  { x: 86, y: 70, rot: -30, nA: 12, nB: 8, P: 40, spin: 40, dir: -1, o: 0.3, blur: 0 },
+  { x: 50, y: 68, rot: 8, nA: 20, nB: 12, P: 120, spin: 90, dir: 1, o: 0.12, blur: 2 },
+];
+
+function Gears() {
+  return (
+    <div className="gear-layer" style={{ '--par': 14 } as React.CSSProperties}>
+      {GEAR_PAIRS.map((g, i) => {
+        const m = (2 * g.P) / g.nA;
+        const rpB = (m * g.nB) / 2;
+        const roA = g.P + m, roB = rpB + m;
+        // Offset that puts a gap of gear B exactly where gear A's tooth points (angle 90°) at t = 0.
+        const offB = (270 + 180 / g.nB) % (360 / g.nB);
+        const spinB = g.spin * (g.nB / g.nA);
+        return (
+          <div key={i} className="gear-pair" style={{ left: `${g.x}%`, top: `${g.y}%`, width: roA + g.P + rpB + roB, height: Math.max(roA, roB) * 2, opacity: g.o, filter: g.blur ? `blur(${g.blur}px)` : undefined, '--r': `${g.rot}deg` } as React.CSSProperties}>
+            <span className="gear-a" style={{ left: 0, top: 0 }}>
+              <Gear n={g.nA} rp={g.P} m={m} spin={g.spin} reverse={g.dir < 0} offset={0} sw={1.4} />
+            </span>
+            <span className="gear-b" style={{ left: roA + g.P + rpB - roB, top: roA - roB }}>
+              <Gear n={g.nB} rp={rpB} m={m} spin={spinB} reverse={g.dir > 0} offset={offB} sw={1.4} />
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 // Deterministic pseudo-random so server and client render identical markup.
 const SPARKLES = (() => {
   let seed = 7;
@@ -172,6 +241,7 @@ export function Atmosphere() {
       <div className="atm-cold" />
       <div className="atm-warm" />
       <div className="atm-aurora" />
+      <Gears />
       <Crystals />
       <div className="sparkle-layer">
         {SPARKLES.map((p, i) => (
