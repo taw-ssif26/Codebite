@@ -278,6 +278,16 @@ create policy "resources admin write" on storage.objects for all
   using (bucket_id = 'resources' and public.is_admin())
   with check (bucket_id = 'resources' and public.is_admin());
 
+-- ---------- Table privileges (Data API roles) -----------------------
+-- RLS decides WHICH rows; GRANT decides whether a role may touch the table at all.
+-- Without these, the API returns "permission denied for table ...".
+grant usage on schema public to anon, authenticated;
+grant select on public.site_settings, public.instructors, public.segments, public.notices to anon;
+grant select, insert, update, delete on
+  public.site_settings, public.instructors, public.segments, public.notices,
+  public.resources, public.students, public.admins, public.email_templates
+to authenticated;
+
 -- ---------- Seed content (safe placeholders — edit in /admin) --------
 
 insert into public.email_templates (name, subject, body) values

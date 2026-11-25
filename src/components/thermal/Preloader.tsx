@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { Logo } from '@/components/common/Logo';
 
 /** Skippable 1.8s "Lab Chamber Calibration" boot sequence, once per browser session. */
 export function Preloader() {
@@ -28,6 +29,7 @@ export function Preloader() {
           exit={{ clipPath: 'inset(0 0 100% 0)' }} transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
           initial={{ clipPath: 'inset(0 0 0% 0)' }}
         >
+          <motion.div initial={{ opacity: 0, y: 10, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.15, duration: 0.7 }} className="mb-6"><Logo className="h-12 w-auto" /></motion.div>
           <svg width="220" height="220" viewBox="0 0 220 220" fill="none" aria-hidden>
             <motion.circle cx="110" cy="110" r="84" stroke="rgb(var(--accent-cyan))" strokeWidth="1" pathLength={1} strokeDasharray={1} initial={{ strokeDashoffset: 1 }} animate={{ strokeDashoffset: 0 }} transition={{ duration: 1.3, ease: 'easeInOut' }} />
             <motion.circle cx="110" cy="110" r="52" stroke="rgba(255,255,255,.35)" strokeWidth="1" strokeDasharray="3 6" initial={{ rotate: 0 }} animate={{ rotate: 120 }} style={{ originX: '110px', originY: '110px' }} transition={{ duration: 1.8, ease: 'linear' }} />
